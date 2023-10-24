@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 
 export default function EditPostModal({ _id, initialData, onUpdate }) {
   const [formData, setFormData] = useState(initialData);
-  
+  const [coverFile, setCoverFile] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     
@@ -20,8 +22,32 @@ export default function EditPostModal({ _id, initialData, onUpdate }) {
     }
   };
 
+  const handleCoverChange = (e) => {
+    setCoverFile(e.target.files[0]);
+  };
+
   const handleUpdate = async () => {
     try {
+      const formDataForCloudinary = new FormData();
+      if (coverFile) {
+        formDataForCloudinary.append('cover', coverFile);
+      }
+
+      if (coverFile) {
+        const cloudinaryResponse = await fetch(`${process.env.REACT_APP_URL_ENDPOINT}/posts/${_id}/uploadCover`, {
+          method: 'POST',
+          body: formDataForCloudinary,
+        });
+
+        if (cloudinaryResponse.status === 200) {
+          const cloudinaryData = await cloudinaryResponse.json();
+          formData.cover = cloudinaryData.cover;
+        } else {
+          setErrorMessage('Errore nell\'upload della copertina su Cloudinary');
+          return;
+        }
+      }
+
       const response = await fetch(`${process.env.REACT_APP_URL_ENDPOINT}/posts/update/${_id}`, {
         method: 'PATCH',
         headers: {
@@ -33,16 +59,18 @@ export default function EditPostModal({ _id, initialData, onUpdate }) {
       if (response.status === 200) {
         onUpdate();
       } else {
-        console.error('Errore nell\'aggiornamento del post');
+        setErrorMessage('Errore nell\'aggiornamento del post');
       }
     } catch (error) {
       console.error('Errore nell\'aggiornamento del post', error);
+      setErrorMessage('Errore interno del server');
     }
   };
 
   return (
     <div className="edit-post-form">
       <h3>Modifica Post</h3>
+      {errorMessage && <p className="error-message">{errorMessage}</p>}
       <form>
         <div>
           <label>Titolo</label>
@@ -65,10 +93,10 @@ export default function EditPostModal({ _id, initialData, onUpdate }) {
         <div>
           <label>Copertina</label>
           <input
-            type="text"
+            type="file"
             name="cover"
-            value={formData.cover}
-            onChange={handleInputChange}
+            accept="image/*"
+            onChange={handleCoverChange}
           />
         </div>
         <div>
@@ -98,24 +126,6 @@ export default function EditPostModal({ _id, initialData, onUpdate }) {
             <option value="minuti">Minuti</option>
             <option value="ore">Ore</option>
           </select>
-        </div>
-        <div>
-          <label>Autore (avatar)</label>
-          <input
-            type="text"
-            name="author.avatar"
-            value={formData.author.avatar}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div>
-          <label>Autore (firstName)</label>
-          <input
-            type="text"
-            name="author.firstName"
-            value={formData.author.firstName}
-            onChange={handleInputChange}
-          />
         </div>
         <button type="button" onClick={handleUpdate}>
           Salva Modifiche

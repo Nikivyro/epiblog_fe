@@ -1,6 +1,6 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import SinglePost from './SinglePost';
+import SinglePost from '../Posts/SinglePost';
 
 export default function PostsByUser({ userId }) {
     const [posts, setPosts] = useState([]);

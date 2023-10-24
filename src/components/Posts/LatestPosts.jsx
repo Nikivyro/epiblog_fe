@@ -40,8 +40,8 @@ export default function LatestPosts() {
 
   return (
     <div className="container mx-auto my-3">
-      <div className='grid grid-cols-2 gap-2'>
-        <div className='w-25'>
+      <div className='row'>
+        <div className='col'>
           <button 
             className='p-4 bg-orange-500 rounded-lg'
             onClick={toggleModal}
@@ -59,17 +59,11 @@ export default function LatestPosts() {
           </select>
         </div>
       </div>
-      <div className="grid grid-cols-4 gap-4">
+      <div className="row">
         {posts && posts.posts?.map((post) => (
           <SinglePost
+            key={post._id}
             {...post}
-            // key={post._id}
-            // title={post.title}
-            // cover={post.cover}
-            // category={post.category}
-            // rate={post.rate}
-            // author={post.author}
-            // readTime={post.readTime}
           />
           ))}
       </div>
