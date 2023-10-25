@@ -6,13 +6,7 @@ import { Col, Container, Row } from 'react-bootstrap'
 export default function Home() {
   return (
     <MainLayout>
-        <Container fluid>
-          <Row>
-            <Col xs={12} lg={3} className='bg-primary'></Col>
-            <Col xs={12} lg={6}><LatestPosts/></Col>
-            <Col  xs={12} lg={3} className='bg-secondary'></Col>
-          </Row>
-        </Container>
+      <LatestPosts/>
     </MainLayout>
   )
 }

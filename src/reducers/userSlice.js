@@ -9,7 +9,7 @@ const userSlice = createSlice({
       return { ...state, ...action.payload };
     },
     clearUser: (state) => null,
-    initializeUser: (state, action) => action.payload, // Nuova azione per inizializzare l'utente
+    initializeUser: (state, action) => action.payload,
   },
 });
 

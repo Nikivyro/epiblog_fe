@@ -18,13 +18,15 @@ export default function PostsByUser({ userId }) {
         getUserPosts()
     }, [userId]);
 
-    console.log(posts);
+    const refreshPosts = () =>{
+        getUserPosts()
+    }
 
     return (
-        <div>
-            <p>Post di: {userId}</p>
+        <div className='my-5'>
+            <h2 className='mb-4'>I tuoi Post</h2>
             {posts.map((post) => (
-                <SinglePost key={post._id} {...post} />
+                <SinglePost key={post._id} {...post} refreshPosts={refreshPosts}/>
             ))}
         </div>
     );

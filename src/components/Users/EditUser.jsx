@@ -1,19 +1,61 @@
 import React, { useState } from 'react';
+import { Form, Button, Container, Row, Col, Image } from 'react-bootstrap';
 import axios from 'axios';
 
 export default function EditUser({ userData, userId, onUpdateUser }) {
-  const [formData, setFormData] = useState(userData);
-  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: userData.firstName,
+    lastName: userData.lastName,
+    email: userData.email,
+    avatar: userData.avatar,
+    birthDate: userData.birthDate,
+    password: userData.password,
+  });
+  const [avatar, setAvatar] = useState(null);
+  const [defaultAvatar, setDefaultAvatar] = useState(userData.avatar);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const handleAvatarChange = (e) => {
+    setAvatar(e.target.files[0]);
+  };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await axios.patch(`${process.env.REACT_APP_URL_ENDPOINT}/users/${userId}/update`, formData);
-      console.log('Dati utente aggiornati con successo:', response.data);
+      const formDataForCloudinary = new FormData();
+      if (avatar) {
+        formDataForCloudinary.append('avatar', avatar);
+      }
 
-      setIsEditing(false);
-      onUpdateUser(response.data.result); // Chiama la funzione di callback per aggiornare i dati dell'utente
+      if (avatar) {
+        const cloudinaryResponse = await fetch(
+          `${process.env.REACT_APP_URL_ENDPOINT}/user/avatarUpload`,
+          {
+            method: 'POST',
+            body: formDataForCloudinary,
+          }
+        );
+
+        if (cloudinaryResponse.status === 200) {
+          const cloudinaryData = await cloudinaryResponse.json();
+          formData.avatar = cloudinaryData.avatar;
+        } else {
+          setErrorMessage("Errore nell'upload dell'avatar su Cloudinary");
+          return;
+        }
+      }
+
+      const response = await axios.patch(
+        `${process.env.REACT_APP_URL_ENDPOINT}/users/${userId}/update`,
+        formData
+      );
+
+      if (response.status === 200) {
+        onUpdateUser(response.data.result);
+      } else {
+        setErrorMessage("Errore nell'aggiornamento del post");
+      }
     } catch (error) {
       console.error('Errore durante l\'aggiornamento del profilo:', error);
     }
@@ -25,88 +67,61 @@ export default function EditUser({ userData, userId, onUpdateUser }) {
   };
 
   return (
-    <div>
-      <h3>Edit User: {userId}</h3>
-      {isEditing ? (
-        <form onSubmit={handleFormSubmit}>
-          <div>
-            <label htmlFor="firstName">Nome:</label>
-            <input
+    <Container className='p-3 rounded'>
+      <h3 className='mb-3'>Modifica i tuoi dati</h3>
+      <Form onSubmit={handleFormSubmit}>
+        <Row className="mb-3">
+          <Form.Group as={Col}>
+            <Form.Label className='fw-bold mb-2'>Nome:</Form.Label>
+            <Form.Control
               type="text"
-              id="firstName"
               name="firstName"
               value={formData.firstName}
               onChange={handleInputChange}
             />
-          </div>
-          <div>
-            <label htmlFor="lastName">Cognome:</label>
-            <input
+          </Form.Group>
+          <Form.Group as={Col}>
+            <Form.Label className='fw-bold mb-2'>Cognome:</Form.Label>
+            <Form.Control
               type="text"
-              id="lastName"
               name="lastName"
               value={formData.lastName}
               onChange={handleInputChange}
             />
-          </div>
-          <div>
-            <label htmlFor="email">Email:</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div>
-            <label htmlFor="avatar">Avatar:</label>
-            <input
-              type="text"
-              id="avatar"
-              name="avatar"
-              value={formData.avatar}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div>
-            <label htmlFor="birthDate">Data di nascita:</label>
-            <input
-              type="text"
-              id="birthDate"
-              name="birthDate"
-              value={formData.birthDate}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div>
-            <label htmlFor="password">Password:</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div>
-            <label htmlFor="role">Ruolo:</label>
-            <select
-              id="role"
-              name="role"
-              value={formData.role}
-              onChange={handleInputChange}
-            >
-              <option value="author">Author</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
-          <button type="submit">Salva Modifiche</button>
-          <button onClick={() => setIsEditing(false)}>Annulla</button>
-        </form>
-      ) : (
-        <button onClick={() => setIsEditing(true)}>Modifica Profilo</button>
-      )}
-    </div>
+          </Form.Group>
+        </Row>
+        <Form.Group className="mb-3">
+          <Form.Label className='fw-bold mb-2'>Email:</Form.Label>
+          <Form.Control
+            type="text"
+            name="email"
+            value={formData.email}
+            onChange={handleInputChange}
+          />
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label className='fw-bold mb-2'>Avatar:</Form.Label>
+          <Form.Control
+            type="file"
+            name="avatar"
+            accept="image/*"
+            onChange={handleAvatarChange}
+          />
+          {defaultAvatar && (
+            <Image src={defaultAvatar} alt="Default Avatar" style={{ maxWidth: '100px' }} />
+          )}
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label className='fw-bold mb-2'>Data di Nascita:</Form.Label>
+          <Form.Control
+            type="text"
+            name="birthDate"
+            value={formData.birthDate}
+            onChange={handleInputChange}
+          />
+        </Form.Group>
+        <Button type="submit">Salva Modifiche</Button>
+      </Form>
+    </Container>
   );
 }

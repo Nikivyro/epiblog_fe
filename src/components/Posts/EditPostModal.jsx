@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { Form, Button, Alert, Row, Col, Spinner } from 'react-bootstrap';
 
-export default function EditPostModal({ _id, initialData, onUpdate }) {
+export default function EditPostModal({ _id, initialData, closeModalEdit }) {
   const [formData, setFormData] = useState(initialData);
   const [coverFile, setCoverFile] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const [isEditing, setIsEditing] = useState(false)
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
+
     if (name.includes('.')) {
       const [parent, field] = name.split('.');
       setFormData((prevData) => ({
@@ -34,103 +36,132 @@ export default function EditPostModal({ _id, initialData, onUpdate }) {
       }
 
       if (coverFile) {
-        const cloudinaryResponse = await fetch(`${process.env.REACT_APP_URL_ENDPOINT}/posts/${_id}/uploadCover`, {
-          method: 'POST',
-          body: formDataForCloudinary,
-        });
+        const cloudinaryResponse = await fetch(
+          `${process.env.REACT_APP_URL_ENDPOINT}/posts/${_id}/uploadCover`,
+          {
+            method: 'POST',
+            body: formDataForCloudinary,
+          }
+        );
 
         if (cloudinaryResponse.status === 200) {
           const cloudinaryData = await cloudinaryResponse.json();
           formData.cover = cloudinaryData.cover;
         } else {
-          setErrorMessage('Errore nell\'upload della copertina su Cloudinary');
+          setErrorMessage("Errore nell'upload della copertina su Cloudinary");
           return;
         }
       }
+      
+      setIsEditing(true);
 
-      const response = await fetch(`${process.env.REACT_APP_URL_ENDPOINT}/posts/update/${_id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        `${process.env.REACT_APP_URL_ENDPOINT}/posts/update/${_id}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+        }
+      );
 
       if (response.status === 200) {
-        onUpdate();
+        closeModalEdit()
       } else {
-        setErrorMessage('Errore nell\'aggiornamento del post');
+        setErrorMessage("Errore nell'aggiornamento del post");
       }
     } catch (error) {
-      console.error('Errore nell\'aggiornamento del post', error);
+      console.error("Errore nell'aggiornamento del post", error);
       setErrorMessage('Errore interno del server');
+    } finally {
+      setIsEditing(false);
     }
   };
 
   return (
     <div className="edit-post-form">
-      <h3>Modifica Post</h3>
-      {errorMessage && <p className="error-message">{errorMessage}</p>}
-      <form>
-        <div>
-          <label>Titolo</label>
-          <input
-            type="text"
-            name="title"
-            value={formData.title}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div>
-          <label>Categoria</label>
-          <input
-            type="text"
-            name="category"
-            value={formData.category}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div>
-          <label>Copertina</label>
-          <input
+      {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
+      <Form>
+        <Row>
+          <Col>
+            <Form.Group className='mb-3'>
+              <Form.Label className='fw-bold mb-3'>Titolo</Form.Label>
+              <Form.Control
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+          </Col>
+          <Col>
+            <Form.Group className='mb-3'>
+              <Form.Label className='fw-bold mb-3'>Categoria</Form.Label>
+              <Form.Control
+                type="text"
+                name="category"
+                value={formData.category}
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+          </Col>
+        </Row>
+        <Form.Group className='mb-3'>
+          <Form.Label className='fw-bold mb-3'>Copertina</Form.Label>
+          <Form.Control
             type="file"
             name="cover"
             accept="image/*"
             onChange={handleCoverChange}
           />
-        </div>
-        <div>
-          <label>Contenuto</label>
-          <textarea
+        </Form.Group>
+        <Form.Group className='mb-3'>
+          <Form.Label className='fw-bold mb-3'>Contenuto</Form.Label>
+          <Form.Control
+            as="textarea"
             name="content"
             value={formData.content}
             onChange={handleInputChange}
           />
-        </div>
-        <div>
-          <label>Tempo di lettura (valore)</label>
-          <input
-            type="number"
-            name="readTime.value"
-            value={formData.readTime.value}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div>
-          <label>Tempo di lettura (unità)</label>
-          <select
-            name="readTime.unit"
-            value={formData.readTime.unit}
-            onChange={handleInputChange}
-          >
-            <option value="minuti">Minuti</option>
-            <option value="ore">Ore</option>
-          </select>
-        </div>
-        <button type="button" onClick={handleUpdate}>
-          Salva Modifiche
-        </button>
-      </form>
+        </Form.Group>
+        <Row>
+          <Col>
+            <Form.Group className='mb-3'>
+              <Form.Label className='fw-bold mb-3'>Tempo di lettura (valore)</Form.Label>
+              <Form.Control
+                type="number"
+                name="readTime.value"
+                value={formData.readTime.value}
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+          </Col>
+          <Col>
+            <Form.Group className='mb-3'>
+              <Form.Label className='fw-bold mb-3'>Tempo di lettura (unità)</Form.Label>
+              <Form.Control
+                as="select"
+                name="readTime.unit"
+                value={formData.readTime.unit}
+                onChange={handleInputChange}
+              >
+                <option value="minuti">Minuti</option>
+                <option value="ore">Ore</option>
+              </Form.Control>
+            </Form.Group>
+          </Col>
+        </Row>
+        <Button variant="primary" onClick={handleUpdate} className='mt-3'>
+        {isEditing ? (
+              <>
+                  <Spinner animation="grow" size="sm" /> Caricamento...
+              </>
+          ) : (
+              "Salva modifica"
+        )}
+        </Button>
+      </Form>
     </div>
   );
 }

@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Form, Button, Container, Row, Col, Alert } from 'react-bootstrap';
 
 export default function Register() {
-
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -44,50 +44,55 @@ export default function Register() {
   };
 
   return (
-    <div>
-      <h2>Registrazione</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Nome:</label>
-          <input
-            type="text"
-            name="firstName"
-            value={formData.firstName}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label>Cognome:</label>
-          <input
-            type="text"
-            name="lastName"
-            value={formData.lastName}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label>Email:</label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label>Password:</label>
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-          />
-        </div>
-        <button type="submit">Registrati</button>
-      </form>
-      <p>{message}</p>
-      <p>Sei già registrato? <Link to='/login'>Login</Link></p>
-    </div>
+    <Container className="bg-light" fluid>
+      <Row className="justify-content-center min-vh-100 align-items-center">
+        <Col xs={12} md={6}>
+          <h2>Registrazione su Epiblog</h2>
+          <Form onSubmit={handleSubmit}>
+            <Form.Group className="mb-3">
+              <Form.Label className='fw-bold'>Nome:</Form.Label>
+              <Form.Control
+                type="text"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label className='fw-bold'>Cognome:</Form.Label>
+              <Form.Control
+                type="text"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label className='fw-bold'>Email:</Form.Label>
+              <Form.Control
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label className='fw-bold'>Password:</Form.Label>
+              <Form.Control
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+              />
+            </Form.Group>
+            <Button type="submit" variant="primary">Registrati</Button>
+          </Form>
+          {message && <Alert variant="info" className="mt-3">{message}</Alert>}
+          <p className="mt-3">
+            Sei già registrato? <Link to="/login">Login</Link>
+          </p>
+        </Col>
+      </Row>
+    </Container>
   );
-
 }

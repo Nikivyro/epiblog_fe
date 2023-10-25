@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 
 export default function Login() {
   const [loginData, setLoginData] = useState({});
@@ -41,34 +42,36 @@ export default function Login() {
   };
 
   return (
-    <>
-      <form
-        onSubmit={loginSubmit}
-        className="flex flex-col gap-2 p-3 bg-slate-900 text-white rounded min-w-[400px]">
-        <h1>Login</h1>
-        <input
-          className="p-2 bg-zinc-100 text-black rounded"
-          type="text"
-          name="email"
-          required
-          onChange={handleInputChange}
-        />
-        <input
-          className="p-2 bg-zinc-100 text-black rounded"
-          type="password"
-          name="password"
-          required
-          onChange={handleInputChange}
-        />
-        <button
-          type="submit"
-          className="bg-green-600 p-2 rounded mt-5">
-          Login
-        </button>
-      </form>
-      <div>
-        Non sei ancora registrato? <Link to='/register'>Registrati</Link>
-      </div>
-    </>
+    <Container fluid className="bg-light">
+      <Row className="justify-content-center min-vh-100 align-items-center">
+        <Col xs={12} md={6}>
+          <h1 className="mt-4">Login su Epiblog</h1>
+          <Form onSubmit={loginSubmit} className="mt-4">
+            <Form.Group className="mb-3">
+              <Form.Control
+                type="text"
+                name="email"
+                placeholder="Email"
+                required
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Control
+                type="password"
+                name="password"
+                placeholder="Password"
+                required
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+            <Button type="submit" variant="primary">Login</Button>
+          </Form>
+          <div className="mt-3">
+            Non sei ancora registrato? <Link to='/register'>Registrati</Link>
+          </div>
+        </Col>
+      </Row>
+    </Container>
   );
 }
