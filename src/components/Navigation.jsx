@@ -57,7 +57,7 @@ const Navigation = () => {
               <Dropdown>
                 <Dropdown.Toggle variant="secondary" id="dropdown-basic">
                   <img src={avatar} alt={username} width={20} className='me-1 object-fit-cover rounded'/>
-                  <span className='d-none d-md-block'>{username}</span>
+                  <span className='d-none d-md-flex'>{username}</span>
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
                   <Dropdown.Item><Link to='/me' className='text-decoration-none text-white'>Profilo</Link></Dropdown.Item>
